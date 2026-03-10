@@ -1,153 +1,381 @@
-/* style.css - 디자인 시스템(Variables) 및 애니메이션 */
-:root {
-  /* Colors - 수분감(Hydration) & 클린 뷰티 테마 */
-  --torriden-blue: #8eb3cf;       /* 다이브인 라인 핵심 컬러 */
-  --torriden-light-blue: #e3f0f8;
-  --text-primary: #333333;
-  --text-secondary: #777777;
-  --bg-white: #ffffff;
-  --bg-skeleton: #f0f0f0;
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Torriden - Clean Beauty</title>
+    <style>
+        /* 1. 디자인 시스템 (Variables) */
+        :root {
+            --primary: #8eb3cf;       /* 다이브인 라인의 청량한 수분 블루 */
+            --secondary: #e3f0f8;     /* 밝은 블루 배경 */
+            --text-main: #333333;     /* 기본 텍스트 */
+            --text-sub: #777777;      /* 보조 텍스트 */
+            --bg-white: #ffffff;      /* 배경 (클린 뷰티 여백) */
+            --bg-gray: #f5f7f9;
+            --border-radius: 12px;
+            --transition-speed: 0.3s;
+        }
 
-  /* Spacing */
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-}
+        /* 기본 리셋 및 폰트 설정 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-/* 1. 스켈레톤 스크린 (콘텐츠 로딩) */
-.skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: 8px;
-}
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
+        body {
+            background-color: #e9ecef; /* 데스크톱에서 모바일 뷰포트 구분을 위한 배경 */
+            display: flex;
+            justify-content: center;
+            color: var(--text-main);
+        }
 
-/* 2. 장바구니 피드백 (Bounce) */
-.btn-bounce {
-  animation: bounce 0.4s ease;
-}
-@keyframes bounce {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-}
+        /* 반응형 웹/모바일 래퍼 */
+        .app-container {
+            width: 100%;
+            max-width: 480px; /* 모바일 우선 최적화 폭 */
+            min-height: 100vh;
+            background-color: var(--bg-white);
+            position: relative;
+            overflow-x: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            padding-bottom: 100px; /* 스티키 장바구니 영역 확보 */
+        }
 
-/* 3. 수분 충전 로딩 애니메이션 */
-.water-loading {
-  width: 50px; height: 50px;
-  border: 2px solid var(--torriden-blue);
-  border-radius: 50%;
-  position: relative;
-  overflow: hidden;
-}
-.water-loading::after {
-  content: '';
-  position: absolute;
-  bottom: 0; width: 100%;
-  background: var(--torriden-blue);
-  animation: waterFill 2s ease-in-out infinite alternate;
-}
-@keyframes waterFill {
-  0% { height: 10%; }
-  100% { height: 90%; }
-}
+        /* ==============================================
+           [애니메이션 1] 수분 충전 로딩 모션
+           ============================================== */
+        .water-loader {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg-white);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        .water-circle {
+            width: 80px; height: 80px;
+            border: 3px solid var(--secondary);
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        .water-fill {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: var(--primary);
+            height: 0%;
+            animation: waterFillAnim 1.5s ease-in-out forwards;
+        }
+        @keyframes waterFillAnim {
+            0% { height: 10%; border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            50% { height: 60%; border-radius: 60% 40% 50% 50% / 50% 60% 40% 60%; }
+            100% { height: 100%; border-radius: 0; }
+        }
 
-import React, { useState } from 'react';
+        /* ==============================================
+           [애니메이션 2] Skeleton 로딩 스크린
+           ============================================== */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite linear;
+            border-radius: 8px;
+            color: transparent !important;
+        }
+        .skeleton * { visibility: hidden; }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
 
-const ConcernFilter = ({ products }) => {
-  const [activeConcern, setActiveConcern] = useState('All');
-  const concerns = ['All', '수분/건조', '진정/민감', '모공/피지', '피부결'];
+        /* 공통 레이아웃 */
+        header {
+            padding: 20px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 20px;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--bg-gray);
+        }
+        section { padding: 24px 20px; border-bottom: 8px solid var(--bg-gray); }
+        h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
 
-  return (
-    <div className="concern-navigation">
-      <h3>어떤 피부 고민이 있으신가요?</h3>
-      <div className="filter-chips">
-        {concerns.map(concern => (
-          <button 
-            key={concern}
-            className={`chip ${activeConcern === concern ? 'active' : ''}`}
-            onClick={() => setActiveConcern(concern)}
-          >
-            {concern}
-          </button>
-        ))}
-      </div>
-      {/* 하이퍼 퍼스널라이제이션: 퀴즈 버튼 */}
-      <button className="quiz-btn">1분 피부 진단하고 맞춤 루틴 찾기 🔍</button>
+        /* 히어로 (제품 메인) */
+        .product-image { width: 100%; height: 350px; background-color: var(--secondary); border-radius: var(--border-radius); margin-bottom: 16px; }
+        .product-title { font-size: 22px; margin-bottom: 8px; line-height: 1.4; }
+        .product-price { font-size: 20px; font-weight: 700; color: var(--primary); margin-bottom: 20px; }
+        
+        .btn-main {
+            width: 100%; padding: 16px;
+            background-color: var(--primary); color: white;
+            border: none; border-radius: var(--border-radius);
+            font-size: 16px; font-weight: bold; cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .btn-main:active { transform: scale(0.98); }
+
+        /* A. 피부 고민 필터링 칩 */
+        .chip-container {
+            display: flex; gap: 10px; overflow-x: auto;
+            padding-bottom: 8px; scrollbar-width: none;
+        }
+        .chip-container::-webkit-scrollbar { display: none; }
+        .chip {
+            flex-shrink: 0; padding: 10px 18px;
+            border: 1px solid #ddd; border-radius: 20px;
+            background: var(--bg-white); color: var(--text-sub);
+            font-size: 14px; cursor: pointer; transition: all 0.2s;
+        }
+        .chip.active {
+            border-color: var(--primary); background: var(--secondary);
+            color: var(--primary); font-weight: bold;
+        }
+        .quiz-btn {
+            width: 100%; margin-top: 20px; padding: 16px;
+            background-color: var(--text-main); color: var(--bg-white);
+            border: none; border-radius: var(--border-radius);
+            font-size: 15px; font-weight: bold; cursor: pointer;
+        }
+
+        /* B1. 성분 위젯 */
+        .ingredient-widget {
+            background: var(--bg-gray); padding: 20px;
+            border-radius: var(--border-radius);
+        }
+        .ingredient-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; font-size: 15px; }
+        .progress-bar-bg { width: 100%; height: 12px; background: #e0e0e0; border-radius: 6px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: var(--primary); width: 0%; transition: width 1.5s ease-out; }
+        .ingredient-desc { font-size: 12px; color: var(--text-sub); margin-top: 10px; }
+
+        /* B2. 리뷰 필터 */
+        .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .toggle-wrapper { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-sub); cursor: pointer; }
+        .toggle-switch {
+            width: 40px; height: 22px; background: #ccc;
+            border-radius: 11px; position: relative; transition: 0.3s;
+        }
+        .toggle-switch::after {
+            content: ''; position: absolute; top: 2px; left: 2px;
+            width: 18px; height: 18px; background: #fff; border-radius: 50%;
+            transition: 0.3s;
+        }
+        .toggle-switch.active { background: var(--primary); }
+        .toggle-switch.active::after { transform: translateX(18px); }
+        
+        .review-card { padding: 16px; border: 1px solid #eee; border-radius: var(--border-radius); margin-bottom: 12px; }
+        .review-tag { font-size: 12px; font-weight: bold; color: var(--primary); margin-bottom: 6px; display: inline-block; background: var(--secondary); padding: 4px 8px; border-radius: 4px;}
+        .review-text { font-size: 14px; line-height: 1.5; color: var(--text-main); }
+
+        /* ==============================================
+           [애니메이션 3] C. 스티키 장바구니 바운스 
+           ============================================== */
+        .sticky-atc {
+            position: fixed; bottom: -100px; left: 50%;
+            transform: translateX(-50%); width: 100%; max-width: 480px;
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px);
+            padding: 16px 20px 24px; box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-between; align-items: center;
+            transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+        }
+        .sticky-atc.show { bottom: 0; }
+        .sticky-info .s-title { display: block; font-size: 14px; font-weight: bold; }
+        .sticky-info .s-price { display: block; font-size: 14px; color: var(--text-sub); margin-top: 4px; }
+        
+        .btn-sticky {
+            padding: 14px 24px; background: var(--primary); color: white;
+            border: none; border-radius: 24px; font-weight: bold; font-size: 14px; cursor: pointer;
+        }
+
+        /* 바운스 애니메이션 */
+        .bounce { animation: bounceAnim 0.4s ease; background: var(--text-main); }
+        @keyframes bounceAnim {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 헬퍼 클래스 */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="water-loader" id="water-loader">
+        <div class="water-circle"><div class="water-fill"></div></div>
+        <p style="color: var(--primary); font-weight: bold; margin-top: 10px;">수분을 채우는 중💧</p>
     </div>
-  );
-};
 
-const IngredientWidget = ({ mainIngredient, percentage }) => (
-  <div className="ingredient-widget">
-    <div className="ingredient-chart" style={{ width: `${percentage}%` }}></div>
-    <p><strong>{mainIngredient}</strong> {percentage}% 함유</p>
-    <span className="tooltip">EWG 그린 등급 투명성 인증</span>
-  </div>
-);
+    <div class="app-container">
+        <header>Torriden</header>
 
-const ReviewSection = ({ reviews }) => {
-  const [similarityFilter, setSimilarityFilter] = useState(false);
+        <section>
+            <div class="product-image data-node skeleton" id="hero-img"></div>
+            <h1 class="product-title data-node skeleton" id="hero-title">다이브인 저분자 히알루론산 세럼 50ml</h1>
+            <p class="product-price data-node skeleton" id="hero-price">22,000원</p>
+            <button class="btn-main" id="main-atc">장바구니 담기</button>
+        </section>
 
-  return (
-    <div className="review-container">
-      <div className="review-header">
-        <h4>리뷰 데이터</h4>
-        <label>
-          <input 
-            type="checkbox" 
-            checked={similarityFilter}
-            onChange={() => setSimilarityFilter(!similarityFilter)}
-          />
-          나와 유사한 피부 타입만 보기 (수부지/민감성)
-        </label>
-      </div>
-      {/* 리뷰 리스트 렌더링... */}
+        <section>
+            <h2>어떤 피부 고민이 있으신가요?</h2>
+            <div class="chip-container">
+                <div class="chip active" onclick="selectChip(this)">수분/건조</div>
+                <div class="chip" onclick="selectChip(this)">진정/민감</div>
+                <div class="chip" onclick="selectChip(this)">모공/피지</div>
+                <div class="chip" onclick="selectChip(this)">피부결/톤</div>
+            </div>
+            <button class="quiz-btn">1분 피부 진단하고 맞춤 루틴 찾기 🔍</button>
+        </section>
+
+        <section>
+            <h2>핵심 성분 투명도</h2>
+            <div class="ingredient-widget data-node skeleton" id="ingredient-card">
+                <div class="ingredient-header">
+                    <span>저분자 히알루론산 5D 복합체</span>
+                    <span id="ingredient-percent">70%</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-fill"></div>
+                </div>
+                <p class="ingredient-desc">EWG 그린 등급의 안전하고 깨끗한 수분 에센스</p>
+            </div>
+        </section>
+
+        <section>
+            <div class="review-header">
+                <h2>고객 리얼 리뷰</h2>
+                <div class="toggle-wrapper" onclick="toggleReviews()">
+                    <span>나와 유사한 피부만 보기 (수부지/민감성)</span>
+                    <div class="toggle-switch" id="review-toggle"></div>
+                </div>
+            </div>
+            <div id="review-list">
+                <div class="review-card data-node skeleton" style="height: 100px;"></div>
+                <div class="review-card data-node skeleton" style="height: 100px;"></div>
+            </div>
+        </section>
+
+        <div class="sticky-atc" id="sticky-atc">
+            <div class="sticky-info">
+                <span class="s-title">다이브인 세럼</span>
+                <span class="s-price">22,000원</span>
+            </div>
+            <button class="btn-sticky" id="btn-sticky-action" onclick="addToCartEvent(this)">장바구니 담기</button>
+        </div>
     </div>
-  );
-};
 
-import React, { useState, useEffect } from 'react';
+    <script>
+        // --- 1. 초기 로딩 & 스켈레톤 해제 시뮬레이션 ---
+        document.addEventListener("DOMContentLoaded", () => {
+            // 1.5초 후 수분 충전 로딩 모션 제거
+            setTimeout(() => {
+                const loader = document.getElementById('water-loader');
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 500);
+            }, 1500);
 
-const StickyAddToCart = ({ product }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const [isAdded, setIsAdded] = useState(false);
+            // 2.5초 후 스켈레톤 UI 제거 및 실제 데이터 렌더링
+            setTimeout(() => {
+                const skeletonNodes = document.querySelectorAll('.skeleton');
+                skeletonNodes.forEach(node => node.classList.remove('skeleton'));
+                
+                // 프로그레스 바 애니메이션 실행 (성분 함량 70%)
+                document.getElementById('progress-fill').style.width = '70%';
 
-  // 스크롤 감지 로직
-  useEffect(() => {
-    const handleScroll = () => {
-      // 메인 구매 버튼이 화면에서 사라질 쯤(약 400px) Sticky 바 노출
-      if (window.scrollY > 400) setIsVisible(true);
-      else setIsVisible(false);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+                // 리뷰 데이터 렌더링
+                renderReviews(false);
+            }, 2500);
+        });
 
-  const handleAddToCart = () => {
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 400); // 바운스 애니메이션 시간 후 초기화
-  };
+        // --- A. 피부 고민별 칩 선택 로직 ---
+        function selectChip(element) {
+            const chips = document.querySelectorAll('.chip');
+            chips.forEach(chip => chip.classList.remove('active'));
+            element.classList.add('active');
+        }
 
-  if (!isVisible) return null;
+        // --- B. 리뷰 필터링 로직 (유사 피부 토글) ---
+        const dummyReviews = [
+            { id: 1, type: '수부지/민감성', text: '속당김이 심했는데 이거 쓰고 싹 사라졌어요. 피부가 투명해진 기분입니다 💙' },
+            { id: 2, type: '건성', text: '겨울철 건조함에 최고예요. 듬뿍 바르고 자면 다음날 화장이 잘 먹어요.' },
+            { id: 3, type: '수부지/민감성', text: '성분이 착해서 트러블 없이 진정되는 느낌! 끈적임 없어서 아침에 쓰기 딱 좋네요.' },
+            { id: 4, type: '지성', text: '가벼운 수분감이라 지성이 쓰기에도 부담 없어요.' }
+        ];
 
-  return (
-    <div className="sticky-atc-bar">
-      <div className="product-mini-info">
-        <span className="title">{product.name}</span>
-        <span className="price">{product.price}원</span>
-      </div>
-      <button 
-        className={`add-btn ${isAdded ? 'btn-bounce' : ''}`}
-        onClick={handleAddToCart}
-        style={{ backgroundColor: 'var(--torriden-blue)', color: '#fff' }}
-      >
-        {isAdded ? '담김 완료! 💧' : '장바구니 담기'}
-      </button>
-    </div>
-  );
-};
+        let isToggleActive = false;
+        function toggleReviews() {
+            const toggleBtn = document.getElementById('review-toggle');
+            isToggleActive = !isToggleActive;
+            
+            if(isToggleActive) toggleBtn.classList.add('active');
+            else toggleBtn.classList.remove('active');
 
+            renderReviews(isToggleActive);
+        }
+
+        function renderReviews(filterSimilar) {
+            const listContainer = document.getElementById('review-list');
+            listContainer.innerHTML = ''; // 초기화
+
+            const filtered = filterSimilar 
+                ? dummyReviews.filter(r => r.type === '수부지/민감성') 
+                : dummyReviews;
+
+            filtered.forEach(review => {
+                const card = document.createElement('div');
+                card.className = 'review-card';
+                card.innerHTML = `
+                    <div class="review-tag">${review.type}</div>
+                    <div class="review-text">${review.text}</div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        // --- C. 스티키 장바구니 노출 로직 (Intersection Observer) ---
+        const mainAtc = document.getElementById('main-atc');
+        const stickyAtc = document.getElementById('sticky-atc');
+
+        const observer = new IntersectionObserver((entries) => {
+            // 메인 버튼이 화면에서 사라지면 스티키 버튼 노출
+            if (!entries[0].isIntersecting) {
+                stickyAtc.classList.add('show');
+            } else {
+                stickyAtc.classList.remove('show');
+            }
+        }, { threshold: 0 });
+
+        observer.observe(mainAtc);
+
+        // --- C. 장바구니 담기 마이크로 인터랙션 (바운스 & 텍스트 변경) ---
+        function addToCartEvent(btn) {
+            // 메인버튼, 스티키버튼 공통 클릭 이벤트 처리
+            if(btn.classList.contains('bounce')) return; // 중복 클릭 방지
+            
+            const originalText = btn.innerText;
+            const originalBg = btn.style.background;
+
+            btn.innerText = "담김 완료! 💧";
+            btn.classList.add('bounce');
+
+            // 애니메이션 완료 후 원상 복구
+            setTimeout(() => {
+                btn.classList.remove('bounce');
+                btn.innerText = originalText;
+                btn.style.background = originalBg;
+            }, 2000); // 2초 뒤 텍스트 복구
+        }
+
+        // 메인 버튼에도 동일한 이벤트 리스너 연결
+        mainAtc.addEventListener('click', function() { addToCartEvent(this); });
+
+    </script>
+</body>
+</html>
