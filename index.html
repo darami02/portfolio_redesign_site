@@ -1,246 +1,153 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BLACK UP - Brutalist E-Commerce</title>
-<style>
-  /* 1. Figma Variables (디자인 토큰) */
-  :root {
-    --color-surface-base: #111111;
-    --color-text-primary: #F2F2F2;
-    --color-text-muted: #8A8A8A;
-    --color-accent-vonrestorff: #FF3333;
-    
-    --spacing-touch-target: 44px;
-    --spacing-micro: 8px;
-    --spacing-macro: 80px;
-    --spacing-faceted-gap: 12px;
-    
-    --font-hero: 800 5rem/0.9 'Helvetica Neue', Arial, sans-serif;
-    --font-heading: 700 2.5rem/1.1 'Helvetica Neue', Arial, sans-serif;
-    --font-body: 400 1rem/1.6 'Helvetica Neue', Arial, sans-serif;
-    --font-ui: 500 0.875rem/1 'Helvetica Neue', Arial, sans-serif;
-  }
+/* style.css - 디자인 시스템(Variables) 및 애니메이션 */
+:root {
+  /* Colors - 수분감(Hydration) & 클린 뷰티 테마 */
+  --torriden-blue: #8eb3cf;       /* 다이브인 라인 핵심 컬러 */
+  --torriden-light-blue: #e3f0f8;
+  --text-primary: #333333;
+  --text-secondary: #777777;
+  --bg-white: #ffffff;
+  --bg-skeleton: #f0f0f0;
 
-  /* 2. Base Reset & Brutalism Vibe */
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
+  /* Spacing */
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+}
 
-  body {
-    background-color: var(--color-surface-base);
-    color: var(--color-text-primary);
-    font: var(--font-body);
-    /* 브루탈리즘 특유의 거칠고 딱딱한 그리드 느낌을 위해 전체 테두리 활용 */
-    border: 2px solid var(--color-text-primary);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+/* 1. 스켈레톤 스크린 (콘텐츠 로딩) */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
+/* 2. 장바구니 피드백 (Bounce) */
+.btn-bounce {
+  animation: bounce 0.4s ease;
+}
+@keyframes bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
 
-  /* HEADER */
-  header {
-    padding: var(--spacing-micro) var(--spacing-macro);
-    border-bottom: 2px solid var(--color-text-primary);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    /* 피츠의 법칙: 헤더 영역의 최소 터치 높이 확보 */
-    min-height: calc(var(--spacing-touch-target) * 1.5);
-  }
+/* 3. 수분 충전 로딩 애니메이션 */
+.water-loading {
+  width: 50px; height: 50px;
+  border: 2px solid var(--torriden-blue);
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+}
+.water-loading::after {
+  content: '';
+  position: absolute;
+  bottom: 0; width: 100%;
+  background: var(--torriden-blue);
+  animation: waterFill 2s ease-in-out infinite alternate;
+}
+@keyframes waterFill {
+  0% { height: 10%; }
+  100% { height: 90%; }
+}
 
-  .logo {
-    font: var(--font-hero);
-    font-size: 3rem; /* 모바일 고려 사이즈 조정 */
-    letter-spacing: -0.05em;
-    text-transform: uppercase;
-  }
+import React, { useState } from 'react';
 
-  /* NAV (힉의 법칙: 패싯 검색 및 상호 의존적 노출) */
-  nav {
-    padding: var(--spacing-macro) var(--spacing-macro) var(--spacing-micro);
-    border-bottom: 2px solid var(--color-text-primary);
-  }
+const ConcernFilter = ({ products }) => {
+  const [activeConcern, setActiveConcern] = useState('All');
+  const concerns = ['All', '수분/건조', '진정/민감', '모공/피지', '피부결'];
 
-  .nav-categories {
-    display: flex;
-    gap: var(--spacing-faceted-gap);
-    margin-bottom: var(--spacing-macro);
-  }
-
-  .category-btn {
-    background: transparent;
-    color: var(--color-text-primary);
-    border: 1px solid var(--color-text-primary);
-    font: var(--font-ui);
-    text-transform: uppercase;
-    cursor: pointer;
-    /* 피츠의 법칙: 44px 터치 타겟 보장 */
-    min-height: var(--spacing-touch-target);
-    padding: 0 24px;
-    transition: all 0.2s ease;
-  }
-
-  .category-btn:hover, .category-btn.active {
-    background: var(--color-text-primary);
-    color: var(--color-surface-base);
-  }
-
-  .facet-filters {
-    display: none; /* 기본적으로 숨김 (선택적 노출) */
-    gap: var(--spacing-faceted-gap);
-    padding-top: var(--spacing-faceted-gap);
-    border-top: 1px dashed var(--color-text-muted);
-  }
-
-  .facet-filters.show {
-    display: flex;
-  }
-
-  .filter-btn {
-    background: transparent;
-    color: var(--color-text-muted);
-    border: none;
-    font: var(--font-ui);
-    text-decoration: underline;
-    text-underline-offset: 4px;
-    cursor: pointer;
-    /* 피츠의 법칙: 텍스트 링크라도 터치 영역 확장 */
-    padding: 12px 0;
-    min-height: var(--spacing-touch-target);
-  }
-
-  .filter-btn:hover {
-    color: var(--color-text-primary);
-  }
-
-  /* MAIN (사회적 증명 및 폰 레스토프 효과) */
-  main {
-    flex: 1;
-    padding: var(--spacing-macro);
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: var(--spacing-macro);
-  }
-
-  .product-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-micro);
-  }
-
-  .product-image-placeholder {
-    width: 100%;
-    aspect-ratio: 3/4;
-    background-color: #222;
-    border: 1px solid var(--color-text-muted);
-    position: relative;
-    overflow: hidden;
-  }
-
-  /* 폰 레스토프 효과 (고립 효과) 및 사회적 증명 */
-  .social-proof-badge {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    background-color: var(--color-accent-vonrestorff);
-    color: var(--color-text-primary);
-    font: var(--font-ui);
-    font-weight: 700;
-    padding: 8px 12px;
-    text-transform: uppercase;
-    /* 대조를 극대화하여 시선 집중 */
-  }
-
-  .product-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-  }
-
-  .product-title {
-    font: var(--font-heading);
-    font-size: 1.5rem;
-  }
-
-  .product-price {
-    font: var(--font-ui);
-    color: var(--color-text-muted);
-  }
-</style>
-</head>
-<body>
-
-  <header>
-    <div class="logo">BLACK UP</div>
-    <a href="#" style="font: var(--font-ui); min-height: var(--spacing-touch-target); display:flex; align-items:center;">CART (0)</a>
-  </header>
-
-  <nav>
-    <div class="nav-categories">
-      <button class="category-btn" onclick="toggleFacets('outer')">OUTER</button>
-      <button class="category-btn" onclick="toggleFacets('pants')">PANTS</button>
-      <button class="category-btn" onclick="toggleFacets('top')">TOP</button>
+  return (
+    <div className="concern-navigation">
+      <h3>어떤 피부 고민이 있으신가요?</h3>
+      <div className="filter-chips">
+        {concerns.map(concern => (
+          <button 
+            key={concern}
+            className={`chip ${activeConcern === concern ? 'active' : ''}`}
+            onClick={() => setActiveConcern(concern)}
+          >
+            {concern}
+          </button>
+        ))}
+      </div>
+      {/* 하이퍼 퍼스널라이제이션: 퀴즈 버튼 */}
+      <button className="quiz-btn">1분 피부 진단하고 맞춤 루틴 찾기 🔍</button>
     </div>
-    
-    <div class="facet-filters" id="pants-filters">
-      <button class="filter-btn">기장: 롱</button>
-      <button class="filter-btn">기장: 숏</button>
-      <button class="filter-btn">핏: 와이드</button>
-      <button class="filter-btn">핏: 스키니</button>
+  );
+};
+
+const IngredientWidget = ({ mainIngredient, percentage }) => (
+  <div className="ingredient-widget">
+    <div className="ingredient-chart" style={{ width: `${percentage}%` }}></div>
+    <p><strong>{mainIngredient}</strong> {percentage}% 함유</p>
+    <span className="tooltip">EWG 그린 등급 투명성 인증</span>
+  </div>
+);
+
+const ReviewSection = ({ reviews }) => {
+  const [similarityFilter, setSimilarityFilter] = useState(false);
+
+  return (
+    <div className="review-container">
+      <div className="review-header">
+        <h4>리뷰 데이터</h4>
+        <label>
+          <input 
+            type="checkbox" 
+            checked={similarityFilter}
+            onChange={() => setSimilarityFilter(!similarityFilter)}
+          />
+          나와 유사한 피부 타입만 보기 (수부지/민감성)
+        </label>
+      </div>
+      {/* 리뷰 리스트 렌더링... */}
     </div>
-  </nav>
+  );
+};
 
-  <main>
-    <article class="product-card">
-      <div class="product-image-placeholder">
-        <div class="social-proof-badge">13만 장 판매 돌파</div>
+import React, { useState, useEffect } from 'react';
+
+const StickyAddToCart = ({ product }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isAdded, setIsAdded] = useState(false);
+
+  // 스크롤 감지 로직
+  useEffect(() => {
+    const handleScroll = () => {
+      // 메인 구매 버튼이 화면에서 사라질 쯤(약 400px) Sticky 바 노출
+      if (window.scrollY > 400) setIsVisible(true);
+      else setIsVisible(false);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleAddToCart = () => {
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 400); // 바운스 애니메이션 시간 후 초기화
+  };
+
+  if (!isVisible) return null;
+
+  return (
+    <div className="sticky-atc-bar">
+      <div className="product-mini-info">
+        <span className="title">{product.name}</span>
+        <span className="price">{product.price}원</span>
       </div>
-      <div class="product-info">
-        <h2 class="product-title">RAW DENIM 01</h2>
-        <span class="product-price">₩54,000</span>
-      </div>
-    </article>
+      <button 
+        className={`add-btn ${isAdded ? 'btn-bounce' : ''}`}
+        onClick={handleAddToCart}
+        style={{ backgroundColor: 'var(--torriden-blue)', color: '#fff' }}
+      >
+        {isAdded ? '담김 완료! 💧' : '장바구니 담기'}
+      </button>
+    </div>
+  );
+};
 
-    <article class="product-card">
-      <div class="product-image-placeholder"></div>
-      <div class="product-info">
-        <h2 class="product-title">STRUCTURED BLAZER</h2>
-        <span class="product-price">₩128,000</span>
-      </div>
-    </article>
-  </main>
-
-  <script>
-    // 힉의 법칙 적용: 선택지를 최소화하고 필요할 때만 노출하는 JS 로직
-    function toggleFacets(category) {
-      // 모든 카테고리 버튼의 active 상태 해제
-      document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
-      
-      // 모든 필터 영역 숨김
-      document.querySelectorAll('.facet-filters').forEach(filter => filter.classList.remove('show'));
-
-      // 클릭한 카테고리에 맞는 필터만 노출 (예시로 PANTS 카테고리만 연동)
-      if (category === 'pants') {
-        const pantsFilters = document.getElementById('pants-filters');
-        if (pantsFilters) {
-          pantsFilters.classList.add('show');
-          // 현재 클릭된 버튼 활성화 표시
-          event.currentTarget.classList.add('active');
-        }
-      } else {
-        event.currentTarget.classList.add('active');
-      }
-    }
-  </script>
-
-</body>
-</html>
